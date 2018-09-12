@@ -1,0 +1,492 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[letterpaper, margin=2cm]{geometry}
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=Cyan,
+  filecolor=Red,
+  urlcolor=Cyan,
+}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{fancyvrb}
+\usepackage{minted}
+
+\setlength{\parindent}{0pt}
+
+\title{\textbf{Tutorial Angular 6}}
+\author{\textbf{Mateo Agudelo Toro}}
+\date{\textbf{Septiembre 2018}}
+
+\begin{document}
+
+\maketitle
+
+
+%%%
+\section{Introducci\'on}
+Angular es un framework para front end de c\'odigo abierto muy popular. Utiliza principalmente TypeScript (JavaScript con tipos de datos y m\'as) para crear aplicaciones web tanto para m\'ovil como para desktop. Este es un tutorial simple basado en \href{https://coursetro.com/posts/code/154/Angular-6-Tutorial---Learn-Angular-6-in-this-Crash-Course}{este tutorial en ingl\'es}.
+
+En nuestro caso crearemos una aplicaci\'on que consume un API REST que nos permite tanto hacer reviews sobre servicios prestados por autom\'oviles, como ver todas las reviews.
+
+
+%%%
+\section{Prerequisitos}
+Angular propiamente se instala como un paquete de Node, por lo que necesitaremos tener instalado tanto Node como su manejador de paquetes (NPM, Node Package Manager).
+
+Sin entrar en detalles sobre este aspecto (pues son muy variados y dependen de muchos factores), se recomienda instalar la versi\'on LTS (actualmente la m\'as reciente de este tipo es la 8.12.0, pero versiones como la 8.11.4 tambi\'en est\'an bien, pues la versi\'on 8 es la LTS). Esta deber\'a incluir NPM en versi\'on 5.6.0 o similar.
+
+Para verificar la instalaci\'on de Node.js podemos correr en la terminal es siguiente comando:
+
+\begin{Verbatim}[fontsize=\small,commandchars=\\\(\)]
+    (\color(red)$ \color(blue)node -v)
+\end{Verbatim}
+
+El cual, de ser correcta la instalaci\'on, deber\'a responder con algo como 
+
+\begin{Verbatim}[fontsize=\small,commandchars=\\\(\)]
+    (\color(blue)8.11.4)
+\end{Verbatim}
+
+Del mismo, modo, para verificar la instalaci\'on de NPM:
+
+\begin{Verbatim}[fontsize=\small,commandchars=\\\(\)]
+    (\color(red)$ \color(blue)npm -v)
+\end{Verbatim}
+
+Y deber\'a responder con algo como
+
+\begin{Verbatim}[fontsize=\small,commandchars=\\\(\)]
+    (\color(blue)5.6.0)
+\end{Verbatim}
+
+
+%%%
+\section{Instalaci\'on}
+Ya que tenemos NPM, para instalar Angular podemos simplemente ejecutar 
+
+\begin{Verbatim}[fontsize=\small,commandchars=\\\(\)]
+    (\color(red)$ \color(blue)npm install -g @angular/cli)
+\end{Verbatim}
+
+Lo que realmente estamos haciendo es instalar la interfaz de linea de comandos de Angular (Angular Command Line Interface o CLI) de manera global (contrario a para alg\'un proyecto espec\'ifico de Node).
+
+
+
+%%%
+\section{Creaci\'on de Proyecto}
+Para esto utilizaremos el CLI de Angular que har\'a gran parte del trabajo repetitivo por nosotros. Para crear el proyecto de este ejemplo utilizaremos el siguiente comando:
+
+\begin{Verbatim}[fontsize=\small,commandchars=\\\(\)]
+    (\color(red)$ \color(blue)ng new ejempl-ng6 --routing)
+\end{Verbatim}
+
+Lo que hacemos es, mediante el CLI (llamado con \textit{ng}) crear un nuevo proyecto (especificado mediante el argumento \textit{new}) llamado \textit{ejemplo-ng6} con un par\'ametro adicional (\textit{--routing}) que nos ayudar\'a con el enrutamiento de nuestra aplicaci\'on.
+
+Una vez este comando finalice, se habr\'a creado el proyecto base en la carpeta \textit{ejmplo-ng6}, sobre la cual construiremos nuestra aplicaci\'on.
+
+
+%%%
+\section{API Service}
+Aqu\'i definiremos la forma de conectarnos al API REST que tenemos. Primero inicializamos el servicio utilizando el CLI y luego lo modificamos a nuestra necesidad:
+
+\begin{Verbatim}[fontsize=\small,commandchars=\\\(\)]
+    (\color(red)$ \color(blue)ng generate service api)
+\end{Verbatim}
+
+\vspace{0.5cm}
+\textbf{api.service.ts}:
+\begin{minted}{typescript}
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class ApiService {
+  readonly headers: HttpHeaders = new HttpHeaders().set('ZUMO-API-VERSION', '2.0.0');
+  readonly endpoint = 'https://reportrans.azurewebsites.net/tables/report';
+
+  constructor(private httpClient: HttpClient) { }
+
+  getPosts() {
+    return this.httpClient.get(this.endpoint, { headers: this.headers });
+  }
+
+  addPost(post: Object) {
+    this.httpClient.post(this.endpoint, post, { headers: this.headers })
+      .subscribe(
+        res => console.log(res),
+        err => console.log(`Couldn't add post: ${JSON.stringify(err)}`)
+      );
+  }
+}
+\end{minted}
+
+
+%%%
+\section{Componentes}
+Angular crea lo que llaman \textit{aplicaciones de p\'agina \'unica} o \textit{SPAs, Single Page Applications}, por lo que la forma en la que se crea la interactividad en la aplicaci\'on es mostrando en pantalla \'unicamente los componentes adecuados con base en el input del usuario.
+
+Existen por lo menos dos formas de generar componentes utilizando el CLI. La forma larga:
+
+\begin{Verbatim}[fontsize=\small,commandchars=\\\(\)]
+    (\color(red)$ \color(blue)ng generate component \color(OrangeRed)<nombre-del-componente>)
+\end{Verbatim}
+
+Y la forma abreviada:
+
+\begin{Verbatim}[fontsize=\small,commandchars=\\\(\)]
+    (\color(red)$ \color(blue)ng g c \color(OrangeRed)<nombre-del-componente>)
+\end{Verbatim}
+
+Los componentes en Angular se conforman a su vez de 4 partes:
+
+\begin{itemize}
+    \item \textbf{Controlador}: es el archivo que maneja la l\'ogica "del negocio". Por defecto se llama \textit{nombre-del-componente}.component.ts.
+    
+    \item \textbf{Vista}: es el archivo que estructura lo que el usuario ve. Por defecto se llama \textit{nombre-del-componente}.component.html.
+    
+    \item \textbf{Estilos}: es el archivo que hace que lo que ve el usuario sea bonito. Por defecto se llama \textit{nombre-del-componente}.component.css. No nos enfocaremos en este aspecto.
+    
+    \item \textbf{Pruebas}: es el archivo que comprueba la funcionalidad del componente. Por defecto se llama \textit{nombre-del-componente}.component.spec.ts.
+\end{itemize}
+
+Para nuestro ejemplo crearemos 4 componentes:
+
+\begin{itemize}
+    \item \textbf{Add}: componente para agregar una review.
+    
+    \item \textbf{Home}: componente para darle la bienvenida al usuario. No lo extenderemos mucho.
+    
+    \item \textbf{Posts}: componente para ver rodas las reviews.
+    
+    \item \textbf{Sidebar}: barra de navegaci\'on lateral que le permitir\'a al usuario utilizar las diferentes funcionalidades de la aplicaci\'on. En nuestro caso probablemente no sea lateral (por defecto se sit\'uan en la parte superior de la p\'agina) ya que para esto necesitar\'iamos utilizar CSS y no queremos enforcarnos en este aspecto.
+\end{itemize}
+
+Para esto los inicializamos as\'i:
+
+\begin{Verbatim}[fontsize=\small,commandchars=\\\(\)]
+    (\color(red)$ \color(blue)ng g c add)
+    (\color(red)$ \color(blue)ng g c home)
+    (\color(red)$ \color(blue)ng g c posts)
+    (\color(red)$ \color(blue)ng g c sidebar)
+\end{Verbatim}
+
+%%
+\subsection{Integraci\'on}
+Para integrar los componentes y crear la noci\'on de interactividad en el usuario tenemos que trabajar directamente con el componente ra\'iz: \texttt{app.component.html}.
+
+Le agregaremos la barra de navegaci\'on y dejaremos que el contenido sea definido din\'amicamente por el enrutador (controlado por el usuario mediante la barra de navegaci\'on):
+
+\begin{minted}{html}
+<div id="container">
+  <app-sidebar></app-sidebar>
+
+  <div id="content">
+    <router-outlet></router-outlet>
+  </div>
+</div>
+\end{minted}
+
+\subsection{Estilos b\'asicos}
+Si bien Angular es un framework para el front end, el objetivo de este tutorial es m\'as sobre el consumo de un API que sobre la est\'etica del producto. Es por esto que simplemente utilizaremos Bootstrap (y algo de CSS luego, pero muy poco).
+
+Para esto debemos interactuar directamente con la \'unica p\'agina que realmente tenemos (\texttt{index.html}) y agregar Bootstrap al \texttt{head}:
+
+\begin{minted}{html}
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+  integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+    crossorigin="anonymous"></script>
+    
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" 
+  integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+    crossorigin="anonymous"></script>
+
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" 
+  integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+    crossorigin="anonymous">
+    
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" 
+  integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+    crossorigin="anonymous"></script>
+\end{minted}
+
+%%
+\subsection{Add}
+Tal y como hab\'iamos mencionado, este componente permite agregar reviews, por lo que es simplemente un formulario que env\'ia los valores recolectados al servidor mediante el API REST que se nos provee.
+
+\vspace{0.5cm}
+\textbf{add.component.ts}:
+\begin{minted}{typescript}
+import { Component, OnInit } from '@angular/core';
+import { ApiService } from '../api.service';
+
+@Component({
+  selector: 'app-add',
+  templateUrl: './add.component.html',
+  styleUrls: ['./add.component.css']
+})
+export class AddComponent {
+  post: any = {};
+
+  constructor(private apiService: ApiService) { }
+
+  onSubmit() {
+    this.apiService.addPost(this.post);
+  }
+
+}
+\end{minted}
+
+\vspace{0.5cm}
+\textbf{add.component.html}:
+\begin{minted}{html}
+<h1>Add</h1>
+
+<ul>
+  <li>
+    <form name="form" (ngSubmit)="f.form.valid && onSubmit()" #f="ngForm" novalidate>
+      <div class="form-group">
+        <label for="carPlate">Car Plate</label>
+        <input type="text" class="form-control" name="carPlate" 
+        [(ngModel)]="post.carPlate" #firstName="ngModel" [ngClass]="false"
+          required />
+      </div>
+      <div class="form-group">
+        <label for="type">Car Type</label>
+        <input type="text" class="form-control" name="type" 
+        [(ngModel)]="post.type" #firstName="ngModel" [ngClass]="false"
+          required />
+      </div>
+      <div class="form-group">
+        <label for="score">Score</label>
+        <input type="text" class="form-control" name="score" 
+        [(ngModel)]="post.score" #firstName="ngModel" [ngClass]="false"
+          required />
+      </div>
+      <div class="form-group">
+        <label for="comment">Comment</label>
+        <input type="text" class="form-control" name="comment" 
+        [(ngModel)]="post.comment" #firstName="ngModel" [ngClass]="false"
+          required />
+      </div>
+      <div class="form-group">
+        <button class="btn btn-primary">Register</button>
+      </div>
+    </form>
+  </li>
+</ul>
+\end{minted}
+
+
+%%
+\subsection{Home}
+En este componente le dar\'iamos la bienvenida al usuario y podr\'iamos poner links y dem\'as, pero en nuestro caso no lo implementaremos.
+
+%%
+\subsection{Posts}
+Este es similar al de agregar un review pero lo que hace es pedirlas todas. 
+
+\vspace{0.5cm}
+\textbf{posts.component.ts}:
+\begin{minted}{typescript}
+import { Component, OnInit } from '@angular/core';
+import { ApiService } from '../api.service';
+import { Observable } from 'rxjs';
+
+@Component({
+  selector: 'app-posts',
+  templateUrl: './posts.component.html',
+  styleUrls: ['./posts.component.css']
+})
+export class PostsComponent implements OnInit {
+  posts$: Object;
+
+  constructor(private apiService: ApiService) { }
+
+  ngOnInit() {
+    this.apiService.getPosts().subscribe(data => this.posts$ = data);
+  }
+
+}
+\end{minted}
+
+\vspace{0.5cm}
+\textbf{posts.component.html}:
+\begin{minted}{html}
+<h1>Posts</h1>
+
+<ul>
+  <li *ngFor="let post of posts$">
+    {{ post.id }}
+
+    <ul>
+      <li>Comment: {{ post.comment }}</li>
+      <li>Plate: {{ post.carPlate }}</li>
+      <li>Type: {{ post.type }}</li>
+      <li>Score: {{ post.score }}</li>
+      <li>Created: {{ post.createdAt }}</li>
+      <li>Update: {{ post.updatedAt }}</li>
+    </ul>
+  </li>
+</ul>
+\end{minted}
+
+%%
+\subsection{Sidebar}
+Esta barra permite al usuario entre la dos funcionalidades que hemos implmentado hasta ahora. Los estilos (aunque incompletos) fueron tomados de la p\'agina original del tutorial, la vista son dos enlaces a Add y Posts, y la l\'ogica indica qu\'e funcionalidad est\'a seleccionada para mostrarlo al usuario m\'as facilmente.
+
+
+\vspace{0.5cm}
+\textbf{sidebar.component.ts}:
+\begin{minted}{typescript}
+import { Component, OnInit } from '@angular/core';
+import { Router, NavigationEnd } from '@angular/router';
+
+@Component({
+  selector: 'app-sidebar',
+  templateUrl: './sidebar.component.html',
+  styleUrls: ['./sidebar.component.css']
+})
+export class SidebarComponent implements OnInit {
+  currentUrl: string;
+
+  constructor(private router: Router) {
+    router.events.subscribe((_: NavigationEnd) => {
+      if (_.url !== undefined)
+        this.currentUrl = _.url
+    });
+  }
+
+  ngOnInit() {
+  }
+
+}
+\end{minted}
+
+\vspace{0.5cm}
+\textbf{sidebar.component.html}:
+\begin{minted}{html}
+<nav>
+  <ul>
+    <li>
+      <a routerLink="add" [class.activated]="currentUrl == '/add'">
+        <i class="material-icons">comment</i>
+      </a>
+    </li>
+    <li>
+      <a routerLink="posts" [class.activated]="currentUrl == '/posts'">
+        <i class="material-icons">book</i>
+      </a>
+    </li>
+  </ul>
+</nav>
+\end{minted}
+
+\vspace{0.5cm}
+\textbf{sidebar.component.css} (adaptado utilizando \href{https://www.sassmeister.com/}{SassMeister}):
+\begin{minted}{css}
+nav {
+  background: #2D2E2E;
+  height: 100%;
+}
+nav ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+nav ul li a {
+  color: #FFF;
+  padding: 20px;
+  display: block;
+}
+nav ul li .activated {
+  background-color: #00A8FF;
+}
+\end{minted}
+
+
+%%%
+\section{Enrutamiento}
+Aqu\'i simplemente asocionamos los componentes a las rutas que les queremos asignar.
+
+\vspace{0.5cm}
+\textbf{app-routing.module.ts}:
+\begin{minted}{typescript}
+import { NgModule } from '@angular/core';
+import { Routes, RouterModule } from '@angular/router';
+import { AddComponent } from './add/add.component';
+import { HomeComponent } from './home/home.component';
+import { PostsComponent } from './posts/posts.component';
+
+const routes: Routes = [
+  {
+    path: 'add',
+    component: AddComponent
+  },
+  {
+    path: '',
+    component: HomeComponent
+  },
+  {
+    path: 'posts',
+    component: PostsComponent
+  }
+];
+
+@NgModule({
+  imports: [RouterModule.forRoot(routes)],
+  exports: [RouterModule]
+})
+export class AppRoutingModule { }
+\end{minted}
+
+\section{Integraci\'on final}
+Esta parte realmente se va haciendo a medida que se hacen cambios; en nuestro caso la dejamos para el final:
+
+\vspace{0.5cm}
+\textbf{app.module.ts}:
+\begin{minted}{typescript}
+import { BrowserModule } from '@angular/platform-browser';
+import { NgModule } from '@angular/core';
+
+import { AppRoutingModule } from './app-routing.module';
+import { HttpClientModule } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
+import { AppComponent } from './app.component';
+import { SidebarComponent } from './sidebar/sidebar.component';
+import { PostsComponent } from './posts/posts.component';
+import { AddComponent } from './add/add.component';
+import { HomeComponent } from './home/home.component';
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    SidebarComponent,
+    PostsComponent,
+    AddComponent,
+    HomeComponent
+  ],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    HttpClientModule,
+    FormsModule
+  ],
+  providers: [],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
+\end{minted}
+
+\section{Correr la aplicaci\'on}
+Para correr la aplicaci\'on en modo desarrollador (la p\'agina se recarga autom\'aticamente cuando hay cambios en el c\'odigo) podemos usar el siguiente comando:
+
+\begin{Verbatim}[fontsize=\small,commandchars=\\\(\)]
+    (\color(red)$ \color(blue)ng serve)
+\end{Verbatim}
+
+Para usarla, visiten \url{http://localhost:4200/} (por defecto).
+
+\end{document}
