@@ -1,0 +1,14 @@
+<h1>Reports</h1>
+<ul>
+  <li *ngFor="let reports of reports$">
+    {{ reports.id }}
+    <ul>
+      <li>Comment: {{ reports.comment }}</li>
+      <li>Plate: {{ reports.carPlate }}</li>
+      <li>Type: {{ reports.type }}</li>
+      <li>Score: {{ reports.score }}</li>
+      <li>Created: {{ reports.createdAt }}</li>
+      <li>Update: {{ reports.updatedAt }}</li>
+    </ul>
+  </li>
+</ul>

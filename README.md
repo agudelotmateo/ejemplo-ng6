@@ -1,27 +1,39 @@
 # EjemploNg6
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 6.2.1.
+Este es un pequeño ejemplo de como usar Angular para construir el front end que consume un API rest. 
 
-## Development server
+## Errata
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+Tal y como vimos en clase, no funcionó. Esto se debe principalmente a la adaptación de nombres que hicimos en caliente y al copy paste del final. Las correcciones son las siguientes:
 
-## Code scaffolding
+### Funcionales
+- **sidebar.component.ts:** la hoja de estilos tiene extensión `.css` y no `.scss` (en nuestro caso, esto debido a que usamos CSS y no SASS como el tutorial original)
+- **reports.component.ts:** en la función `ngOnInit()` utilice un *arrow function* para asignar el valor de `reports`. No usé este tipo de funciones en clase para no tener que explicarlas (excelente error, son mucho más buenas que las ''normales''), pero básicamente permiten tanto una sintaxis mas limpia como el paso de contexto, es decir, de no usarlas en este caso no tendríamos acceso a la variable `reports` de la clase `ReportsComponent`, pues al usar funciones normales el contexto cambia y por tanto `this` hace referencia a otro objeto. Nota: la sintaxis puede ser aún más limpia; de hecho la guía utiliza unicamente arrow functions.
+- **add.component.ts:** `report` debe inicializarse como un objeto vacío. El profesor Alejandro me preguntó por esto durante la clase pero no le entendí :pensive:
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+### Visuales
+- **sidebar.component.html:**
+    - reemplace ambos `posts` de la equiqueta `a` por `reports`
+    - reemplace `comment` en el nombre del primer botón por `add`
+    - reemplace `book` en el nombre del segundo botón por `reports`
+- **api.service.ts:** en el string que se imprime en caso de error, cambie `post` por `report`
+- **reports.component.hml:** reemplace todos los `posts` por `reports`
 
-## Build
+Se recomienda que corrijan el código propio, pero de cualquier manera el código contenido en este repositorio parece funcionar correctamente.
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+## Otros errores
 
-## Running unit tests
+La aplicación es muy pobre y le falta mucho, pero hay dos cosas que quisiera mencionar:
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+- Al agregar un reporte, el usuario no recibe feedback. La unica forma de saberlo es abriendo la consola (`Ctrl` + `Shift` + `I` en Firefox); en caso de error lo va a imprimir, y en caso de éxito va a imprimir el objeto que guardó. 
 
-## Running end-to-end tests
+- A veces se toma un tiempo para cargar los reportes. Siempre y cuando no imprima un error en consola, está cargando.
 
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
+- Hay un problema con el API y es que no envía en sus respuestas un header necesario para permitir el acceso a este desde otras aplicaciones (como la nuestra). Mientras esto se resuelve, es necesario saltarse el CORS. Para esto en Firefox se puede usar el Add-on [CORS Everywhere](https://addons.mozilla.org/es/firefox/addon/cors-everywhere/); recuerde nunca hacer esto para otras páginas.
 
-## Further help
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+## Extra
+
+La guía que escribí y utilicé durante la clase también está en este repositorio en la carpeta `/latex`, tanto el `.pdf` como el `.tex` por si le quieren agregar o cambiar algo. La pueden manipular ya sea localmente o utilizando herramientas gratuitas como [Overleaf](https://www.overleaf.com/)
+
+Recuerden además visitar la [guía original (en inglés)](https://coursetro.com/posts/code/154/Angular-6-Tutorial---Learn-Angular-6-in-this-Crash-Course) para mayor información, sobre todo para que no se vea tan fea la aplicación :sweat_smile:
