@@ -37,3 +37,5 @@ La aplicación es muy pobre y le falta mucho, pero hay dos cosas que quisiera me
 La guía que escribí y utilicé durante la clase también está en este repositorio en la carpeta `/latex`, tanto el `.pdf` como el `.tex` por si le quieren agregar o cambiar algo. La pueden manipular ya sea localmente o utilizando herramientas gratuitas como [Overleaf](https://www.overleaf.com/)
 
 Recuerden además visitar la [guía original (en inglés)](https://coursetro.com/posts/code/154/Angular-6-Tutorial---Learn-Angular-6-in-this-Crash-Course) para mayor información, sobre todo para que no se vea tan fea la aplicación :sweat_smile:
+
+**PD:** si va a clonar este repositorio, recuerde correr `npm install` para instalar todas las dependencias. Sin esto cualquier comando como `ng serve` *no* va a funcionar.
